@@ -1,79 +1,36 @@
-// src/lib/auth.jsx
-import React, { createContext, useContext, useEffect, useState } from "react";
-import {
-  GoogleAuthProvider,
-  createUserWithEmailAndPassword,
-  signInWithEmailAndPassword,
-  signInWithPopup,
-  signOut,
-  updateProfile,
-  onAuthStateChanged,
-} from "firebase/auth";
-import { auth } from "./firebase.js";
+import React, { createContext, useContext, useMemo, useState } from 'react';
+import { initState, setUser as setUserState } from './state.js';
 
-const AuthCtx = createContext(null);
-
-const ADMIN_EMAILS = new Set(["admin@emc.uz"]); // kerak bo‘lsa ko‘paytirasan
+const AuthContext = createContext(null);
 
 export function AuthProvider({ children }) {
-  const [user, setUser] = useState(null);
-  const [booting, setBooting] = useState(true);
+  const [appState, setAppState] = useState(() => initState());
 
-  useEffect(() => {
-    const unsub = onAuthStateChanged(auth, (u) => {
-      if (!u) {
-        setUser(null);
-        setBooting(false);
-        return;
-      }
-      const email = (u.email || "").toLowerCase();
-      setUser({
-        id: u.uid,
-        name: u.displayName || "Foydalanuvchi",
-        email: u.email || "",
-        isAdmin: ADMIN_EMAILS.has(email),
-        photoURL: u.photoURL || "",
-      });
-      setBooting(false);
-    });
-    return () => unsub();
-  }, []);
+  const user = appState.user;
 
-  const loginGoogle = async () => {
-    const provider = new GoogleAuthProvider();
-    await signInWithPopup(auth, provider);
-  };
+  const api = useMemo(() => {
+    return {
+      user,
+      appState,
+      setAppState,
+      login: ({ name, email, isAdmin = false }) => {
+        const u = {
+          id: email.toLowerCase().trim(),
+          name: name.trim(),
+          email: email.toLowerCase().trim(),
+          isAdmin
+        };
+        setAppState((s) => setUserState(s, u));
+      },
+      logout: () => setAppState((s) => setUserState(s, null))
+    };
+  }, [user, appState]);
 
-  const signUpEmail = async ({ name, email, password }) => {
-    const cred = await createUserWithEmailAndPassword(auth, email, password);
-    if (name) await updateProfile(cred.user, { displayName: name });
-    // user state onAuthStateChanged orqali yangilanadi
-  };
-
-  const loginEmail = async ({ email, password }) => {
-    await signInWithEmailAndPassword(auth, email, password);
-  };
-
-  const logout = async () => {
-    await signOut(auth);
-  };
-
-  return (
-    <AuthCtx.Provider
-      value={{
-        user,
-        booting,
-        loginGoogle,
-        signUpEmail,
-        loginEmail,
-        logout,
-      }}
-    >
-      {children}
-    </AuthCtx.Provider>
-  );
+  return <AuthContext.Provider value={api}>{children}</AuthContext.Provider>;
 }
 
 export function useAuth() {
-  return useContext(AuthCtx);
+  const ctx = useContext(AuthContext);
+  if (!ctx) throw new Error('useAuth must be used inside <AuthProvider>');
+  return ctx;
 }

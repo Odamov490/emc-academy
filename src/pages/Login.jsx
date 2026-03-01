@@ -86,12 +86,12 @@ export default function Login() {
           className="btn btnGhost"
           type="button"
           onClick={onGoogleSignIn}
-          disabled={busyGoogle || !hasGoogleAuth}
-          title={hasGoogleAuth ? '' : 'Firebase env qiymatlari kiritilmagan'}
+          disabled={busyGoogle}
+          title="Google orqali kirish"
         >
-          {busyGoogle ? 'Google orqali kirilmoqda...' : 'Continue with Google'}
+          {busyGoogle ? 'Google orqali kirilmoqda...' : 'Google bilan kirish'}
         </button>
-        {!hasGoogleAuth ? <div className="muted mt8">Google login uchun Firebase env qiymatlarini sozlang.</div> : null}
+        {!hasGoogleAuth ? <div className="muted mt8">Google login uchun Firebase env qiymatlari hali sozlanmagan.</div> : null}
       </Card>
     </div>
   );

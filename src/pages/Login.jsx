@@ -3,12 +3,31 @@ import { useNavigate } from 'react-router-dom';
 import { Card } from '../components/ui.jsx';
 import { useAuth } from '../lib/auth.jsx';
 
+function mapGoogleError(error) {
+  const code = error?.code || '';
+
+  if (code === 'auth/popup-closed-by-user') {
+    return 'Google oynasi yopildi. Qayta urinib ko‘ring.';
+  }
+
+  if (code === 'auth/popup-blocked') {
+    return 'Popup bloklangan. Brauzerda popup ruxsatini yoqing.';
+  }
+
+  if (code === 'auth/cancelled-popup-request') {
+    return 'Google kirish jarayoni bekor qilindi.';
+  }
+
+  return error?.message || 'Google orqali kirishda xatolik yuz berdi.';
+}
+
 export default function Login() {
-  const { login } = useAuth();
+  const { login, signInWithGoogle, hasGoogleAuth } = useAuth();
   const nav = useNavigate();
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [error, setError] = useState('');
+  const [busyGoogle, setBusyGoogle] = useState(false);
 
   const onSubmit = (e) => {
     e.preventDefault();
@@ -22,6 +41,19 @@ export default function Login() {
     login({ name, email: cleanEmail, isAdmin });
     setError('');
     nav('/academy');
+  };
+
+  const onGoogleSignIn = async () => {
+    setError('');
+    setBusyGoogle(true);
+    try {
+      await signInWithGoogle();
+      nav('/academy');
+    } catch (err) {
+      setError(mapGoogleError(err));
+    } finally {
+      setBusyGoogle(false);
+    }
   };
 
   return (
@@ -47,6 +79,19 @@ export default function Login() {
             Admin demo: <b>admin@emc.uz</b> kiritsang, <b>/admin</b> ochiladi.
           </div>
         </form>
+
+        <div className="divider" />
+
+        <button
+          className="btn btnGhost"
+          type="button"
+          onClick={onGoogleSignIn}
+          disabled={busyGoogle || !hasGoogleAuth}
+          title={hasGoogleAuth ? '' : 'Firebase env qiymatlari kiritilmagan'}
+        >
+          {busyGoogle ? 'Google orqali kirilmoqda...' : 'Continue with Google'}
+        </button>
+        {!hasGoogleAuth ? <div className="muted mt8">Google login uchun Firebase env qiymatlarini sozlang.</div> : null}
       </Card>
     </div>
   );

@@ -8,11 +8,19 @@ export default function Login() {
   const nav = useNavigate();
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
+  const [error, setError] = useState('');
 
   const onSubmit = (e) => {
     e.preventDefault();
-    const isAdmin = email.trim().toLowerCase() === 'admin@emc.uz';
-    login({ name: name || 'Foydalanuvchi', email: email || 'user@emc.uz', isAdmin });
+    const cleanEmail = email.trim().toLowerCase();
+    if (!cleanEmail || !cleanEmail.includes('@')) {
+      setError('Iltimos, to‘g‘ri email kiriting.');
+      return;
+    }
+
+    const isAdmin = cleanEmail === 'admin@emc.uz';
+    login({ name, email: cleanEmail, isAdmin });
+    setError('');
     nav('/academy');
   };
 
@@ -28,9 +36,11 @@ export default function Login() {
           <label className="label mt10">Email</label>
           <input className="input" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="gulomjon@..." />
 
+          {error ? <div className="errorText mt8">{error}</div> : null}
+
           <div className="row gap10 mt16">
             <button className="btn" type="submit">Kirish</button>
-            <button className="btn btnGhost" type="button" onClick={() => { setName(''); setEmail(''); }}>Tozalash</button>
+            <button className="btn btnGhost" type="button" onClick={() => { setName(''); setEmail(''); setError(''); }}>Tozalash</button>
           </div>
 
           <div className="muted mt12">

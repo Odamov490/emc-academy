@@ -18,7 +18,7 @@ export default function Learn() {
 
   if (!course) return <div className="muted">Kurs topilmadi.</div>;
 
-  const done = (lessonId) => isLessonDone(appState, courseId, lessonId);
+  const done = (lessonId) => (lessonId ? isLessonDone(appState, courseId, lessonId) : false);
 
   const markDone = () => {
     if (!activeLesson) return;

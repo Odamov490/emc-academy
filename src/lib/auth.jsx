@@ -14,10 +14,12 @@ export function AuthProvider({ children }) {
       appState,
       setAppState,
       login: ({ name, email, isAdmin = false }) => {
+        const cleanEmail = email.toLowerCase().trim();
+        const cleanName = name.trim() || cleanEmail.split('@')[0] || 'Foydalanuvchi';
         const u = {
-          id: email.toLowerCase().trim(),
-          name: name.trim(),
-          email: email.toLowerCase().trim(),
+          id: cleanEmail,
+          name: cleanName,
+          email: cleanEmail,
           isAdmin
         };
         setAppState((s) => setUserState(s, u));

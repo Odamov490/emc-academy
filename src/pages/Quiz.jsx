@@ -29,7 +29,7 @@ export default function Quiz() {
   const completion = getCourseCompletion(appState, courseId, lessons);
   const locked = completion.percent !== 100;
 
-  const qset = useMemo(() => shuffle(questions), [courseId]);
+  const qset = useMemo(() => shuffle(questions), [questions]);
   const [answers, setAnswers] = useState({});
   const [submitted, setSubmitted] = useState(false);
   const [score, setScore] = useState(null);
@@ -48,7 +48,7 @@ export default function Quiz() {
   };
 
   const onSubmit = () => {
-    if (locked) return;
+    if (locked || qset.length === 0) return;
     const total = qset.length;
     let correct = 0;
     for (const q of qset) {
@@ -124,8 +124,10 @@ export default function Quiz() {
           <div className="muted">
             Quiz ochilishi uchun darslar 100% bo‘lishi kerak. <Link to={`/learn/${courseId}`}>Darslarga qaytish</Link>
           </div>
-        ) : (
+        ) : qset.length ? (
           <div className="muted">Savollar: {qset.length} ta. Javob bergan: {answeredCount}/{qset.length}</div>
+        ) : (
+          <div className="muted">Savollar topilmadi. Admin paneldan kurs savollarini tekshiring.</div>
         )}
 
         <div className="mt14">
@@ -157,7 +159,7 @@ export default function Quiz() {
 
         <div className="row gap10 mt16 wrap">
           <Link className="btn btnGhost" to={`/learn/${courseId}`}>Darslar</Link>
-          <button className="btn" onClick={onSubmit} disabled={locked || submitted || answeredCount !== qset.length}>
+          <button className="btn" onClick={onSubmit} disabled={locked || submitted || !qset.length || answeredCount !== qset.length}>
             {submitted ? 'Yuborildi ✅' : 'Yakunlash'}
           </button>
         </div>

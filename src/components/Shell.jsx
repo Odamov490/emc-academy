@@ -26,6 +26,7 @@ function Topbar() {
         </div>
 
         <nav className="nav">
+          <NavLink to="/">Bosh sahifa</NavLink>
           <NavLink to="/academy">Kurslar</NavLink>
           <NavLink to="/verify/EMC-2026-000001">Verify</NavLink>
           {user?.isAdmin ? <NavLink to="/admin">Admin</NavLink> : null}
@@ -52,7 +53,7 @@ function Footer() {
       <div className="container footerInner">
         <div>
           <div className="muted">⚠️ Demo rejim: ma’lumotlar localStorage’da saqlanadi.</div>
-          <div className="muted">Keyin emclab saytingga ulamiz (DB + real sertifikat verifikatsiya).</div>
+          <div className="muted">Ish jarayoni: kurs → darslar → quiz → sertifikat → verify.</div>
         </div>
         <div className="muted">© {new Date().getFullYear()} EMC Academy</div>
       </div>
